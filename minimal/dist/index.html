@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>节点监控</title>
+<link rel="icon" href="/favicon.svg" />
+<style>
+:root{
+  --bg:#fafafa; --fg:#1a1a1a; --muted:#6b7280; --line:#e5e5e5; --card:#ffffff;
+  --ok:#16a34a; --warn:#d97706; --bad:#dc2626; --dim:#9ca3af;
+  --accent:#2563eb; --okbg:#f0fdf4; --warnbg:#fffbeb; --badbg:#fef2f2;
+}
+html[data-theme="dark"]{
+  --bg:#0a0a0a; --fg:#f5f5f5; --muted:#9ca3af; --line:#262626; --card:#111111;
+  --ok:#4ade80; --warn:#fbbf24; --bad:#f87171; --dim:#6b7280;
+  --accent:#60a5fa; --okbg:#052e16; --warnbg:#451a03; --badbg:#450a0a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+  font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 56px}
+.mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
+
+/* 顶栏 */
+.top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:22px;height:22px;display:block;flex:none}
+.site{font-size:18px;font-weight:600;letter-spacing:-.2px}
+.counts{margin-left:auto;display:flex;gap:14px;font-size:13px;color:var(--muted)}
+.counts b{color:var(--fg);font-weight:600}
+.counts .off b{color:var(--bad)}
+
+/* 公告 */
+.notice{margin:14px 0 0;padding:9px 14px;border:1px solid var(--line);border-radius:8px;
+  background:var(--card);color:var(--fg);font-size:13px}
+
+/* 汇总条 */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 20px}
+.summary .cell{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.summary .k{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
+.summary .v{font-size:20px;font-weight:600;margin-top:3px}
+.summary .v small{font-size:12px;color:var(--muted);font-weight:400}
+@media(max-width:640px){.summary{grid-template-columns:repeat(2,1fr)}}
+
+/* 节点表 */
+.sec-head{display:flex;align-items:baseline;gap:10px;margin:6px 0 10px}
+.sec-head h2{margin:0;font-size:15px;font-weight:600}
+.sec-head .meta{font-size:12px;color:var(--muted);margin-left:auto}
+.tablewrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;background:var(--card)}
+table.node{width:100%;border-collapse:collapse;min-width:700px}
+table.node th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;
+  text-align:left;font-weight:500;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+table.node td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.node tr:last-child td{border-bottom:none}
+table.node tbody tr:hover{background:color-mix(in srgb, var(--card) 88%, var(--fg) 5%)}
+.col-name{min-width:172px}
+.col-status{width:120px}.col-cpu{min-width:156px}.col-lat{width:92px}
+.col-rx{width:92px}.col-tx{width:92px}.col-exp{min-width:108px}
+.r{text-align:right}
+
+/* 状态点 */
+.st{display:inline-flex;align-items:center;gap:7px;font-size:13px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--dim);flex:none}
+.dot.on{background:var(--ok)}.dot.off{background:var(--bad)}
+.st .txt{color:var(--fg)}
+.st.sub{font-size:12px;color:var(--muted);margin-top:3px}
+.off-tag{color:var(--bad)}
+.no-metric{font-size:12px;color:var(--dim)}
+
+/* 节点名 */
+.name{font-weight:500;display:flex;align-items:center;gap:8px;min-width:0}
+.name .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.remark{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;flex:none}
+
+/* CPU 条 */
+.bar{display:flex;align-items:center;gap:8px}
+.track{flex:1;height:6px;border-radius:999px;background:color-mix(in srgb,var(--fg) 8%,transparent);overflow:hidden}
+.fill{height:100%;border-radius:999px;background:var(--accent);width:0}
+.fill.hi{background:var(--warn)}.fill.max{background:var(--bad)}
+.pct{font-size:12px;color:var(--muted);width:34px;text-align:right}
+.mem{font-size:11.5px;color:var(--muted);margin-top:3px}
+
+/* 到期 */
+.exp{font-size:12px}
+.exp.ok{color:var(--fg)}.exp.soon{color:var(--warn)}.exp.expd{color:var(--bad)}
+.exp.never{color:var(--dim)}
+.exp .cyc{color:var(--muted)}
+
+/* 错误 / 空态 */
+.err{margin:14px 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--bad) 40%,var(--line));
+  background:var(--badbg);color:var(--bad);border-radius:8px;font-size:13px}
+.empty{text-align:center;color:var(--muted);padding:40px 0;font-size:13px}
+
+/* 页脚 */
+.foot{margin-top:26px;display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--dim);flex-wrap:wrap}
+.foot .dotp{display:inline-flex;align-items:center;gap:6px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--ok)}
+.pulse.stale{background:var(--warn)}
+@media(prefers-reduced-motion:reduce){.pulse{animation:none!important}}
+.pulse{animation:breathe 2s ease-in-out infinite}
+@keyframes breathe{0%,100%{opacity:.45}50%{opacity:1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <img class="logo" src="/favicon.svg" alt="" onerror="this.style.display='none'" />
+      <span class="site" id="site">节点监控</span>
+    </div>
+    <div class="counts" id="counts"></div>
+  </header>
+
+  <div class="notice" id="notice" hidden></div>
+
+  <section class="summary" id="summary"></section>
+
+  <div class="sec-head">
+    <h2>节点</h2>
+    <span class="meta" id="meta"></span>
+  </div>
+  <div class="tablewrap"><table class="node mono">
+    <thead><tr>
+      <th class="col-name">节点</th>
+      <th class="col-status">状态</th>
+      <th class="col-cpu">CPU / 内存</th>
+      <th class="col-lat r">延迟</th>
+      <th class="col-rx r">下行</th>
+      <th class="col-tx r">上行</th>
+      <th class="col-exp">到期</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table></div>
+
+  <div class="err" id="err" hidden></div>
+
+  <footer class="foot">
+    <span class="dotp"><span class="pulse" id="pulse"></span><span id="live">已连接</span></span>
+    <span>刷新于 <span id="upd">—</span></span>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* 主题短名：读站点级设置 /api/themes/{short}/config */
+var SHORT = "minimal";
+
+/* ===== 纯格式化函数 ===== */
+function bytesPerSec(n){
+  if(n==null||!isFinite(n)||n<0) return "—";
+  var u=["B/s","KB/s","MB/s","GB/s","TB/s"],i=0;
+  while(n>=1024&&i<u.length-1){n/=1024;i++;}
+  var s=i===0?String(Math.round(n)):n.toFixed(n>=100?0:(n>=10?1:2));
+  return s+" "+u[i];
+}
+function humanBytes(n){
+  if(n==null||!isFinite(n)) return "—";
+  var u=["B","KB","MB","GB","TB","PB"],i=0;
+  while(n>=1024&&i<u.length-1){n/=1024;i++;}
+  return (i===0?Math.round(n):n.toFixed(n>=100?0:1))+" "+u[i];
+}
+/* 到期（文档：用 expires_in；旧版 hub 没有则回退 expires_at） */
+function expireInfo(node){
+  if(node.expires_in!=null){
+    var d=node.expires_in;
+    if(d<0)  return {cls:"expd", txt:"已过期 "+Math.abs(d)+" 天", urgent:true};
+    if(d===0)return {cls:"expd", txt:"今天到期", urgent:true};
+    if(d<=7) return {cls:"soon", txt:d+" 天后到期", urgent:true};
+    if(d<=30)return {cls:"soon", txt:d+" 天后到期", urgent:false};
+    return {cls:"ok", txt:d+" 天后到期", urgent:false};
+  }
+  if(node.expires_at){
+    var days=Math.ceil((new Date(node.expires_at).getTime()-Date.now())/86400000);
+    if(isFinite(days))
+      return {cls:days<=0?"expd":"ok", txt:days<=0?"已过期":days+" 天后到期", urgent:days<=0};
+  }
+  return {cls:"never", txt:"长期有效", urgent:false};
+}
+/* 付款周期（文档 months() 的中文化） */
+function cycleLabel(c){
+  if(!c) return "";
+  var named={monthly:"月",quarterly:"季",semiannual:"半年",yearly:"年",biennial:"两年",triennial:"三年"};
+  if(c==="once") return "一次性";
+  if(named[c]) return named[c];
+  var m=/^(\d+)m$/.exec(c); if(m) return m[1]+" 个月";
+  return c;
+}
+/* 离线时长（文档：用 last_seen_ago，不要减浏览器时钟） */
+function offlineAgo(sec){
+  if(sec==null||sec<=0) return "";
+  var h=Math.floor(sec/3600),mi=Math.floor((sec%3600)/60);
+  if(h>0) return "离线 "+h+" 小时";
+  if(mi>0) return "离线 "+mi+" 分钟";
+  return "离线 "+Math.max(1,Math.round(sec))+" 秒";
+}
+/* 价格（文档 money()） */
+function money(amount,currency){
+  if(amount==null||!isFinite(amount)||!currency) return null;
+  try{return new Intl.NumberFormat("zh-CN",{style:"currency",currency:currency,
+    maximumFractionDigits:2}).format(amount);}
+  catch(e){return currency+" "+amount.toFixed(2);}
+}
+/* 最近延迟：取全局最新 ts 的非空 latency */
+function lastLatency(arr){
+  if(!arr||!arr.length) return null;
+  var best=null,bestTs=-1;
+  for(var i=0;i<arr.length;i++){
+    var r=arr[i];
+    if(r.latency!=null&&r.ts>bestTs){bestTs=r.ts;best=r.latency;}
+  }
+  return best;
+}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){
+  return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+/* 延迟：取 ping 序列里全局最新 ts 的非空 latency */
+function lastLatencyFromPing(arr){
+  if(!arr||!arr.length) return null;
+  var best=null,bestTs=-1;
+  for(var i=0;i<arr.length;i++){
+    var r=arr[i];
+    if(r.latency!=null&&r.ts>bestTs){bestTs=r.ts;best=r.latency;}
+  }
+  return best;
+}
+
+/* ===== 状态与渲染 ===== */
+var state={site:"",notice:"",nodes:[],latency:{},wsLive:false,err:""};
+
+function renderNotice(){
+  var el=document.getElementById("notice");
+  if(state.notice){el.textContent=state.notice;el.hidden=false;}
+  else el.hidden=true;
+}
+function renderCounts(){
+  var on=0,off=0;
+  state.nodes.forEach(function(n){n.online?on++:off++;});
+  document.getElementById("counts").innerHTML=
+    "<span>共 <b>"+state.nodes.length+"</b> 节点</span>"+
+    "<span>在线 <b>"+on+"</b></span>"+
+    (off?'<span class="off">离线 <b>'+off+"</b></span>":"");
+}
+function renderSummary(){
+  var rx=0,tx=0,mr=0,mt=0,on=0;
+  state.nodes.forEach(function(n){
+    if(!n.online) return; on++;
+    var m=n.metrics||{};
+    rx+=m.net_rx||0; tx+=m.net_tx||0;
+    mr+=n.month_rx||0; mt+=n.month_tx||0;
+  });
+  var total=state.nodes.length;
+  var rate=total?Math.round(on/total*100):0;
+  document.getElementById("summary").innerHTML=
+    '<div class="cell"><div class="k">在线率</div><div class="v">'+rate+'<small> / '+on+" 在线 · "+total+"</small></div></div>"+
+    '<div class="cell"><div class="k">全站下行</div><div class="v">'+esc(bytesPerSec(rx))+'</div></div>'+
+    '<div class="cell"><div class="k">全站上行</div><div class="v">'+esc(bytesPerSec(tx))+'</div></div>'+
+    '<div class="cell"><div class="k">本月流量</div><div class="v">'+esc(humanBytes(mr+mt))+'</div></div>';
+}
+function renderMeta(){
+  document.getElementById("meta").textContent=
+    state.nodes.length+" 个节点 · "+new Date().toLocaleTimeString("zh-CN");
+}
+function nodeRow(n){
+  var m=n.metrics;
+  // 三态（文档）：离线(metrics:null 且 online:false) / 刚连上未上报(online:true 但 metrics:null) / 在线
+  var reallyOnline = n.online && m;
+  var stDot,stTxt,stSub="";
+  if(reallyOnline){
+    stDot="on";stTxt="在线";
+  }else{
+    stDot="off";stTxt="离线";
+    // 离线时长用 last_seen_ago（文档）；metrics:null 但 online:true 的"刚连上"按 0 处理
+    var agoSec = (n.last_seen_ago!=null) ? n.last_seen_ago : 0;
+    if(n.online) stSub='<span class="no-metric">指标未上报</span>';
+    else{var ago=offlineAgo(agoSec);if(ago)stSub='<span class="off-tag">'+esc(ago)+"</span>";}
+  }
+
+  var cpuCell;
+  if(m&&m.cpu!=null){
+    var c=Math.max(0,Math.min(100,m.cpu));
+    var cls=c>90?"max":(c>70?"hi":"");
+    var memTxt=m.mem_used!=null&&m.mem_total?humanBytes(m.mem_used)+" / "+humanBytes(m.mem_total)+" 内存":"";
+    cpuCell='<div class="bar"><div class="track"><div class="fill '+cls+'" style="width:'+c+'%"></div></div>'+
+      '<span class="pct">'+Math.round(c)+'%</span></div>'+
+      (memTxt?'<div class="mem">'+esc(memTxt)+"</div>":"");
+  }else cpuCell='<span class="no-metric">不可用</span>';
+
+  var lat=state.latency[n.id]!=null?state.latency[n.id]:null;
+  var latTxt=lat!=null?Math.round(lat)+" ms":'<span class="no-metric">—</span>';
+
+  var rx=(m&&m.net_rx!=null)?bytesPerSec(m.net_rx):'<span class="no-metric">—</span>';
+  var tx=(m&&m.net_tx!=null)?bytesPerSec(m.net_tx):'<span class="no-metric">—</span>';
+
+  var e=expireInfo(n);
+  var expTxt='<span class="exp '+e.cls+'">'+esc(e.txt)+"</span>";
+  var price=money(n.price,n.currency);
+  if(price) expTxt+='<br><span class="cyc" style="font-size:11px;color:var(--muted)">'+esc(price)+" "+esc(cycleLabel(n.billing_cycle))+"</span>";
+  else expTxt+='<br><span style="font-size:11px;color:var(--dim)">'+esc(cycleLabel(n.billing_cycle)||"—")+"</span>";
+
+  var nameHtml='<div class="name">'+(n.country?'<span class="chip">'+esc(n.country)+"</span>":"")+
+    '<span class="nm" title="'+esc(n.name)+'">'+esc(n.name)+"</span></div>";
+  if(n.public_remark) nameHtml+='<div class="remark">'+esc(n.public_remark)+"</div>";
+
+  return "<tr>"+
+    "<td class='col-name'>"+nameHtml+"</td>"+
+    "<td class='col-status'><div class='st'><span class='dot "+stDot+"'></span><span class='txt'>"+stTxt+"</span></div>"+
+      (stSub?'<div class="st sub">'+stSub+"</div>":"")+"</td>"+
+    "<td class='col-cpu'>"+cpuCell+"</td>"+
+    "<td class='col-lat r'>"+latTxt+"</td>"+
+    "<td class='col-rx r'>"+rx+"</td>"+
+    "<td class='col-tx r'>"+tx+"</td>"+
+    "<td class='col-exp'>"+expTxt+"</td>"+
+  "</tr>";
+}
+function renderRows(){
+  var tb=document.getElementById("rows");
+  if(!state.nodes.length){tb.innerHTML='<tr><td colspan="7" class="empty">暂无节点</td></tr>';return;}
+  tb.innerHTML=state.nodes.map(nodeRow).join("");
+}
+function renderLive(){
+  var p=document.getElementById("pulse"),t=document.getElementById("live");
+  p.className="pulse"+(state.wsLive?"":" stale");
+  t.textContent=state.wsLive?"实时推送":"轮询中";
+}
+function renderAll(){
+  renderNotice();renderCounts();renderSummary();renderMeta();renderRows();renderLive();
+  document.getElementById("upd").textContent=new Date().toLocaleTimeString("zh-CN");
+}
+function showErr(t){var el=document.getElementById("err");el.textContent=t;el.hidden=!t;}
+
+/* ===== 数据层（文档 api() 写法）===== */
+function api(path){
+  return fetch(path,{headers:{accept:"application/json"}}).then(function(res){
+    if(res.ok) return res.json();
+    var ct=res.headers.get("content-type")||"";
+    if(ct.indexOf("text/plain")>=0)
+      return res.text().then(function(t){throw{hub:t};});
+    throw{hub:res.status===401?"需要登录后查看":"请求失败（HTTP "+res.status+"）"};
+  });
+}
+function loadConfig(){
+  api("/api/themes/"+SHORT+"/config").then(function(cfg){
+    state.notice=(cfg&&cfg.notice)?String(cfg.notice):"";renderNotice();
+  }).catch(function(){state.notice="";});
+}
+function loadMe(){
+  return api("/api/me").then(function(me){
+    state.site=me.site_name||state.site||"节点监控";
+    document.getElementById("site").textContent=state.site;
+    document.title=state.site;
+  }).catch(function(){});
+}
+function fetchLatencies(){
+  // 优先用节点自带的 ping 序列（若 hub 有给），其余走 metrics 接口分批补拉
+  state.nodes.forEach(function(n){
+    if(n.ping&&n.ping.length){var l=lastLatencyFromPing(n.ping);if(l!=null)state.latency[n.id]=l;}
+  });
+  renderRows();
+  var missing=state.nodes.filter(function(n){
+    return n.online && state.latency[n.id]==null && !(n.ping&&n.ping.length);
+  }).slice(0,20);
+  if(!missing.length) return;
+  // 分批（每批 8 个）避免首屏并发过多；延迟数据属次要，失败不影响主界面
+  var batch=missing.splice(0,8);
+  Promise.all(batch.map(function(n){
+    return api("/api/nodes/"+n.id+"/metrics?hours=1&series=ping")
+      .then(function(d){if(d&&d.ping){var l=lastLatencyFromPing(d.ping);if(l!=null)state.latency[n.id]=l;}})
+      .catch(function(){});
+  })).then(function(){if(missing.length)fetchLatencies();else renderRows();});
+}
+function refreshNodes(){
+  return api("/api/nodes").then(function(d){
+    state.nodes=d.nodes||[];state.err="";showErr("");renderAll();fetchLatencies();
+  }).catch(function(e){
+    state.err=(e&&e.hub)?e.hub:"网络异常，稍后重试";showErr(state.err);
+  });
+}
+
+/* ===== WebSocket（gzip 双帧 + 轮询兜底，文档写法）===== */
+var ws=null;
+function wsUrl(){
+  var s=location.protocol==="https:"?"wss":"ws";
+  return s+"//"+location.host+"/api/ws"+(typeof DecompressionStream==="function"?"?gzip":"");
+}
+function frameText(data){
+  if(typeof data==="string") return Promise.resolve(data);
+  var plain=data.stream().pipeThrough(new DecompressionStream("gzip"));
+  return new Response(plain).text();
+}
+function connectWS(){
+  try{ws=new WebSocket(wsUrl());}catch(e){return;}
+  var decoded=Promise.resolve();
+  ws.onmessage=function(ev){
+    decoded=decoded.then(function(){
+      return frameText(ev.data).then(function(txt){
+        if(ws.readyState!==WebSocket.OPEN) return;
+        var d=JSON.parse(txt);
+        if(d.nodes){
+          state.nodes=d.nodes;state.wsLive=true;
+          // 快照里若带 ping 则同步刷新延迟
+          d.nodes.forEach(function(n){if(n.ping&&n.ping.length){var l=lastLatencyFromPing(n.ping);if(l!=null)state.latency[n.id]=l;}});
+          renderAll();
+        }
+      });
+    }).catch(function(){});
+  };
+  ws.onopen=function(){state.wsLive=true;renderLive();};
+  ws.onclose=function(){state.wsLive=false;renderLive();startPoll();};
+  ws.onerror=function(){if(ws){try{ws.close();}catch(e){}}};
+}
+var pollTimer=null;
+function startPoll(){
+  if(pollTimer) return;
+  pollTimer=setInterval(function(){
+    if(document.hidden||state.wsLive) return;
+    refreshNodes();
+  },5000);
+  setTimeout(function(){if(!state.wsLive)connectWS();},15000);
+}
+function stopAll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}if(ws){try{ws.close();}catch(e){}}}
+
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){stopAll();return;}
+  refreshNodes();connectWS();
+});
+
+/* 深浅色：跟随系统，手动可覆盖 */
+function applyTheme(){
+  var saved;try{saved=localStorage.getItem("theme")||"";}catch(e){}
+  var dark=saved==="dark"||(!saved&&matchMedia("(prefers-color-scheme: dark)").matches);
+  document.documentElement.setAttribute("data-theme",dark?"dark":"light");
+}
+
+/* 启动 */
+applyTheme();
+loadConfig();
+loadMe().then(function(){
+  refreshNodes().then(connectWS);
+});
+</script>
+</body>
+</html>

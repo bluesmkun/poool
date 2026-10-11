@@ -1,0 +1,4 @@
+# 本地 AI / 工作区配置，不进仓库
+.workbuddy-ai/
+# 开发用 mock（按需；包内已含最小验证能力）
+dev-mock.cjs
