@@ -20,7 +20,7 @@ html[data-theme="dark"]{
 html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
   font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
   -webkit-font-smoothing:antialiased}
-.wrap{max-width:1120px;margin:0 auto;padding:24px 20px 56px}
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px 56px}
 .mono{font-variant-numeric:tabular-nums;font-feature-settings:"tnum" 1}
 
 /* 顶栏 */
@@ -36,29 +36,27 @@ html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
 .notice{margin:14px 0 0;padding:9px 14px;border:1px solid var(--line);border-radius:8px;
   background:var(--card);color:var(--fg);font-size:13px}
 
-/* 汇总条 */
-.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 20px}
-.summary .cell{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
-.summary .k{font-size:11px;color:var(--muted);letter-spacing:.4px;text-transform:uppercase}
-.summary .v{font-size:20px;font-weight:600;margin-top:3px}
-.summary .v small{font-size:12px;color:var(--muted);font-weight:400}
-@media(max-width:640px){.summary{grid-template-columns:repeat(2,1fr)}}
-
 /* 节点表 */
-.sec-head{display:flex;align-items:baseline;gap:10px;margin:6px 0 10px}
+.sec-head{display:flex;align-items:baseline;gap:10px;margin:14px 0 10px}
 .sec-head h2{margin:0;font-size:15px;font-weight:600}
 .sec-head .meta{font-size:12px;color:var(--muted);margin-left:auto}
 .tablewrap{border:1px solid var(--line);border-radius:12px;overflow-x:auto;background:var(--card)}
-table.node{width:100%;border-collapse:collapse;min-width:700px}
+table.node{width:100%;border-collapse:collapse;min-width:980px}
 table.node th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;
   text-align:left;font-weight:500;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
-table.node td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+table.node td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
 table.node tr:last-child td{border-bottom:none}
 table.node tbody tr:hover{background:color-mix(in srgb, var(--card) 88%, var(--fg) 5%)}
-.col-name{min-width:172px}
-.col-status{width:120px}.col-cpu{min-width:156px}.col-lat{width:92px}
-.col-rx{width:92px}.col-tx{width:92px}.col-exp{min-width:108px}
 .r{text-align:right}
+.col-os{width:36px}
+.col-name{min-width:158px}
+.col-status{width:112px}
+.col-cpu{min-width:116px}
+.col-mem{min-width:120px}
+.col-disk{min-width:120px}
+.col-traffic{min-width:118px}
+.col-lat{min-width:130px}
+.col-exp{min-width:92px}
 
 /* 状态点 */
 .st{display:inline-flex;align-items:center;gap:7px;font-size:13px}
@@ -75,19 +73,30 @@ table.node tbody tr:hover{background:color-mix(in srgb, var(--card) 88%, var(--f
 .remark{font-size:11.5px;color:var(--muted);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .chip{font-size:11px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px;flex:none}
 
-/* CPU 条 */
+/* OS 图标 */
+.col-os div{display:flex;align-items:center;justify-content:center;line-height:1}
+
+/* 进度条 */
 .bar{display:flex;align-items:center;gap:8px}
 .track{flex:1;height:6px;border-radius:999px;background:color-mix(in srgb,var(--fg) 8%,transparent);overflow:hidden}
 .fill{height:100%;border-radius:999px;background:var(--accent);width:0}
 .fill.hi{background:var(--warn)}.fill.max{background:var(--bad)}
 .pct{font-size:12px;color:var(--muted);width:34px;text-align:right}
-.mem{font-size:11.5px;color:var(--muted);margin-top:3px}
+.sub{font-size:11px;color:var(--muted);margin-top:3px}
+.total{font-size:12px;color:var(--fg);margin-top:4px;font-weight:500}
+
+/* 3 网延迟 */
+.lats{display:flex;flex-direction:column;gap:4px}
+.lats .lrow{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.lats .lnm{color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:64px}
+.lats .lval{font-size:12.5px}
+.lats .lval.ok{color:var(--fg)}.lats .lval.warn{color:var(--warn)}.lats .lval.bad{color:var(--bad)}
+.lats .lval.none{color:var(--dim)}
 
 /* 到期 */
 .exp{font-size:12px}
 .exp.ok{color:var(--fg)}.exp.soon{color:var(--warn)}.exp.expd{color:var(--bad)}
 .exp.never{color:var(--dim)}
-.exp .cyc{color:var(--muted)}
 
 /* 错误 / 空态 */
 .err{margin:14px 0;padding:12px 14px;border:1px solid color-mix(in srgb,var(--bad) 40%,var(--line));
@@ -116,20 +125,20 @@ table.node tbody tr:hover{background:color-mix(in srgb, var(--card) 88%, var(--f
 
   <div class="notice" id="notice" hidden></div>
 
-  <section class="summary" id="summary"></section>
-
   <div class="sec-head">
     <h2>节点</h2>
     <span class="meta" id="meta"></span>
   </div>
   <div class="tablewrap"><table class="node mono">
     <thead><tr>
+      <th class="col-os"></th>
       <th class="col-name">节点</th>
       <th class="col-status">状态</th>
-      <th class="col-cpu">CPU / 内存</th>
-      <th class="col-lat r">延迟</th>
-      <th class="col-rx r">下行</th>
-      <th class="col-tx r">上行</th>
+      <th class="col-cpu">CPU</th>
+      <th class="col-mem">内存</th>
+      <th class="col-disk">硬盘</th>
+      <th class="col-traffic r">总流量</th>
+      <th class="col-lat">3 网延迟</th>
       <th class="col-exp">到期</th>
     </tr></thead>
     <tbody id="rows"></tbody>
@@ -145,41 +154,31 @@ table.node tbody tr:hover{background:color-mix(in srgb, var(--card) 88%, var(--f
 
 <script>
 "use strict";
-/* 主题短名：读站点级设置 /api/themes/{short}/config */
 var SHORT = "minimal";
 
 /* ===== 纯格式化函数 ===== */
-function bytesPerSec(n){
-  if(n==null||!isFinite(n)||n<0) return "—";
-  var u=["B/s","KB/s","MB/s","GB/s","TB/s"],i=0;
-  while(n>=1024&&i<u.length-1){n/=1024;i++;}
-  var s=i===0?String(Math.round(n)):n.toFixed(n>=100?0:(n>=10?1:2));
-  return s+" "+u[i];
-}
 function humanBytes(n){
   if(n==null||!isFinite(n)) return "—";
   var u=["B","KB","MB","GB","TB","PB"],i=0;
   while(n>=1024&&i<u.length-1){n/=1024;i++;}
   return (i===0?Math.round(n):n.toFixed(n>=100?0:1))+" "+u[i];
 }
-/* 到期（文档：用 expires_in；旧版 hub 没有则回退 expires_at） */
+/* 到期（文档：用 expires_in；旧版回退 expires_at） */
 function expireInfo(node){
   if(node.expires_in!=null){
     var d=node.expires_in;
-    if(d<0)  return {cls:"expd", txt:"已过期 "+Math.abs(d)+" 天", urgent:true};
-    if(d===0)return {cls:"expd", txt:"今天到期", urgent:true};
-    if(d<=7) return {cls:"soon", txt:d+" 天后到期", urgent:true};
-    if(d<=30)return {cls:"soon", txt:d+" 天后到期", urgent:false};
-    return {cls:"ok", txt:d+" 天后到期", urgent:false};
+    if(d<0)  return {cls:"expd", txt:"已过期 "+Math.abs(d)+" 天"};
+    if(d===0)return {cls:"expd", txt:"今天到期"};
+    if(d<=30)return {cls:"soon", txt:d+" 天后到期"};
+    return {cls:"ok", txt:d+" 天后到期"};
   }
   if(node.expires_at){
     var days=Math.ceil((new Date(node.expires_at).getTime()-Date.now())/86400000);
-    if(isFinite(days))
-      return {cls:days<=0?"expd":"ok", txt:days<=0?"已过期":days+" 天后到期", urgent:days<=0};
+    if(isFinite(days))return {cls:days<=0?"expd":"ok", txt:days<=0?"已过期":days+" 天后到期"};
   }
-  return {cls:"never", txt:"长期有效", urgent:false};
+  return {cls:"never", txt:"长期有效"};
 }
-/* 付款周期（文档 months() 的中文化） */
+/* 付款周期（文档 months() 中文化） */
 function cycleLabel(c){
   if(!c) return "";
   var named={monthly:"月",quarterly:"季",semiannual:"半年",yearly:"年",biennial:"两年",triennial:"三年"};
@@ -188,7 +187,7 @@ function cycleLabel(c){
   var m=/^(\d+)m$/.exec(c); if(m) return m[1]+" 个月";
   return c;
 }
-/* 离线时长（文档：用 last_seen_ago，不要减浏览器时钟） */
+/* 离线时长（文档：用 last_seen_ago） */
 function offlineAgo(sec){
   if(sec==null||sec<=0) return "";
   var h=Math.floor(sec/3600),mi=Math.floor((sec%3600)/60);
@@ -203,32 +202,61 @@ function money(amount,currency){
     maximumFractionDigits:2}).format(amount);}
   catch(e){return currency+" "+amount.toFixed(2);}
 }
-/* 最近延迟：取全局最新 ts 的非空 latency */
-function lastLatency(arr){
-  if(!arr||!arr.length) return null;
-  var best=null,bestTs=-1;
-  for(var i=0;i<arr.length;i++){
-    var r=arr[i];
-    if(r.latency!=null&&r.ts>bestTs){bestTs=r.ts;best=r.latency;}
+/* 3 网延迟：按探测线路(task_id)分桶，取每桶最新 ts 的非空 latency，按出现顺序最多 3 条 */
+function lastLatencyByProbe(ping, probeNames){
+  if(!ping||!ping.length) return [];
+  var byTask={}, order=[];
+  for(var j=0;j<ping.length;j++){
+    var k=ping[j].task_id;
+    if(order.indexOf(k)===-1) order.push(k);
+    if(!byTask[k]||ping[j].ts>byTask[k].ts) byTask[k]={ts:ping[j].ts, latency:ping[j].latency};
   }
-  return best;
+  return order.slice(0,3).map(function(kk){
+    var rec=byTask[kk]||{};
+    var name=(probeNames&&probeNames[kk])?probeNames[kk]:("线路 "+kk);
+    return {task:kk, name:name, latency:(rec.latency!=null)?rec.latency:null};
+  });
 }
 function esc(s){return String(s).replace(/[&<>"']/g,function(c){
   return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
 
-/* 延迟：取 ping 序列里全局最新 ts 的非空 latency */
-function lastLatencyFromPing(arr){
-  if(!arr||!arr.length) return null;
-  var best=null,bestTs=-1;
-  for(var i=0;i<arr.length;i++){
-    var r=arr[i];
-    if(r.latency!=null&&r.ts>bestTs){bestTs=r.ts;best=r.latency;}
-  }
-  return best;
+/* ===== 发行版识别 + 内联 SVG 标志（零外部依赖，currentColor 跟随主题色）===== */
+function osIcon(os){
+  if(!os) return {key:"unknown", label:"未知", svg:OS_SVGS.unknown};
+  var o=os.toLowerCase(), key="unknown", label=os;
+  if(/debian|bookworm|bullseye/.test(o)){key="debian";label="Debian";}
+  else if(/ubuntu/.test(o)){key="ubuntu";label="Ubuntu";}
+  else if(/red ?hat|rhel|centos|rocky|almalinux|fedora/.test(o)){key="rhel";label="RHEL 系";}
+  else if(/arch|manjaro|endeavour/.test(o)){key="arch";label="Arch 系";}
+  else if(/alpine/.test(o)){key="alpine";label="Alpine";}
+  else if(/opensuse|sles/.test(o)){key="suse";label="openSUSE";}
+  else if(/gentoo/.test(o)){key="gentoo";label="Gentoo";}
+  else if(/amazon|aws/.test(o)){key="amazon";label="Amazon Linux";}
+  else if(/windows/.test(o)){key="windows";label="Windows";}
+  else if(/freebsd/.test(o)){key="bsd";label="FreeBSD";}
+  else if(/macos|darwin|os x/.test(o)){key="macos";label="macOS";}
+  else if(/^linux\b/.test(o)){key="linux";label="Linux";}
+  else{key="unknown";label=os;}
+  return {key:key, label:label, svg:OS_SVGS[key]||OS_SVGS.unknown};
 }
+var OS_SVGS = {
+  debian:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor" fill-opacity=".18"/><circle cx="8" cy="8" r="3.4" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="8" r="1.2"/></svg>',
+  ubuntu:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="2" fill="currentColor"/><circle cx="8" cy="2.6" r="1.6" fill="currentColor"/><circle cx="3.7" cy="10.3" r="1.6" fill="currentColor"/><circle cx="12.3" cy="10.3" r="1.6" fill="currentColor"/><path d="M8 4.4 4.4 9.6a3.9 3.9 0 0 0 7.2 0L8 4.4z" fill="currentColor" fill-opacity=".35"/></svg>',
+  rhel:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2.4" fill="currentColor" fill-opacity=".15"/><path d="M4.6 11c1.4-2.1 2.2-3.4 3.8-3.4 1.4 0 2.3 1.3 2.3 2.8 0 1.1-.6 1.8-1.5 2.3" stroke="currentColor" stroke-width="1.3" fill="none"/></svg>',
+  arch:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 2 3 14h4l1-2.5 1 2.5h4L8 2zm0 3.1 1.7 3.4L8 10.8 6.3 8.5 8 5.1z" fill="currentColor" fill-opacity=".4"/></svg>',
+  alpine:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="5.4" fill="currentColor" fill-opacity=".15"/><path d="M8 3.6l2.3 3.5L8 10.8 5.7 7.1 8 3.6z" fill="currentColor"/></svg>',
+  suse:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="2.4" fill="currentColor" fill-opacity=".15"/><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.4"/></svg>',
+  gentoo:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="5.4" fill="currentColor" fill-opacity=".15"/><circle cx="8" cy="8" r="2.2" fill="currentColor"/></svg>',
+  amazon:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><rect x="2" y="2" width="12" height="12" rx="3" fill="currentColor" fill-opacity=".15"/><path d="M4 7h8l-1 4H3L4 7z" fill="currentColor"/></svg>',
+  windows:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M2 3.5 7 4v4H2V3.5zM8 4.2l6-.7V8H8V4.2zM2 9h5v4l-5-.5V9zM8 9h6v4.5l-6-.7V9z"/></svg>',
+  bsd:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M8 1a7 7 0 1 0 7 7H8V1z" fill="currentColor" fill-opacity=".2"/></svg>',
+  macos:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M10 4c-.6.1-1.2.5-1.5 1.1-.4.6-.5 1.2-.4 1.9.4-.1.8-.3 1.2-.7.4-.4.7-.9.8-1.5 0-.6-.1-1.1-.1-1.1zM11.8 9.3c-.1.2-.1.4 0 .5.2 0 .2-.1.1-.1.3.2.4.5.3.8 0 .3-.1.6-.2.9.1.1.1.3.1.5a2 2 0 0 1-.5 1.3c-.3.5-.8.9-1.3 1.2-.6.4-1.2.6-1.9.6-.4 0-.8-.1-1.2-.3-.3-.1-.6-.1-.9 0-.4.1-.8.2-1.2.2-.7-.1-1.3-.4-1.8-.8-.5-.4-1-.9-1.2-1.5-.2-.6-.2-1.3 0-1.9.2-.5.6-1 .9-1.4.3-.3.6-.5.9-.7.1-.2.2-.5.3-.7.3-.9.8-1.7 1.5-2.3.5-.5 1.2-.7 1.8-.6.3.1.6.3.8.5.2.2.4.4.5.7.2.5.2 1 0 1.4"/></svg>',
+  linux:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><ellipse cx="8" cy="6" rx="1.6" ry="2.4" fill="currentColor"/><path d="M4 8.5c1 .3 2 .3 2.4-.3.5.5 1.4.5 1.9 0 .4.6 1.4.6 1.9 0 .4.6 1.4.6 2.4.3.6 2.4-.4 4.8-1.4 5.5-.6.4-1.4-.2-1.8-.6-.4.5-1.2.5-1.6 0-.4.4-1.2.4-1.6 0-.4.4-1.2.4-1.8.6-1-.7-2-3.1-1.4-5.5z" fill="currentColor"/></svg>',
+  unknown:'<svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="currentColor" fill-opacity=".15"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>'
+};
 
 /* ===== 状态与渲染 ===== */
-var state={site:"",notice:"",nodes:[],latency:{},wsLive:false,err:""};
+var state={site:"",notice:"",nodes:[],probeNames:{},probeLat:{},wsLive:false,err:""};
 
 function renderNotice(){
   var el=document.getElementById("notice");
@@ -243,81 +271,82 @@ function renderCounts(){
     "<span>在线 <b>"+on+"</b></span>"+
     (off?'<span class="off">离线 <b>'+off+"</b></span>":"");
 }
-function renderSummary(){
-  var rx=0,tx=0,mr=0,mt=0,on=0;
-  state.nodes.forEach(function(n){
-    if(!n.online) return; on++;
-    var m=n.metrics||{};
-    rx+=m.net_rx||0; tx+=m.net_tx||0;
-    mr+=n.month_rx||0; mt+=n.month_tx||0;
-  });
-  var total=state.nodes.length;
-  var rate=total?Math.round(on/total*100):0;
-  document.getElementById("summary").innerHTML=
-    '<div class="cell"><div class="k">在线率</div><div class="v">'+rate+'<small> / '+on+" 在线 · "+total+"</small></div></div>"+
-    '<div class="cell"><div class="k">全站下行</div><div class="v">'+esc(bytesPerSec(rx))+'</div></div>'+
-    '<div class="cell"><div class="k">全站上行</div><div class="v">'+esc(bytesPerSec(tx))+'</div></div>'+
-    '<div class="cell"><div class="k">本月流量</div><div class="v">'+esc(humanBytes(mr+mt))+'</div></div>';
-}
 function renderMeta(){
   document.getElementById("meta").textContent=
     state.nodes.length+" 个节点 · "+new Date().toLocaleTimeString("zh-CN");
 }
+/* 资源列：进度条 + 占用/总量 */
+function resourceCell(label, used, total){
+  if(used==null||total==null||total<=0) return "<div class='no-metric'>—</div>";
+  var p=Math.min(100,used/total*100);
+  var cls=p>90?"max":(p>70?"hi":"");
+  return "<div class='bar'><div class='track'><div class='fill "+cls+"' style='width:"+p.toFixed(1)+"%'></div></div>"+
+    "<span class='pct'>"+Math.round(p)+"%</span></div>"+
+    "<div class='sub'>"+esc(label+" ")+"<span>"+humanBytes(used)+" / "+humanBytes(total)+"</span></div>";
+}
 function nodeRow(n){
-  var m=n.metrics;
-  // 三态（文档）：离线(metrics:null 且 online:false) / 刚连上未上报(online:true 但 metrics:null) / 在线
-  var reallyOnline = n.online && m;
+  var m=n.metrics||{};
+  var reallyOnline = n.online && n.metrics;
   var stDot,stTxt,stSub="";
-  if(reallyOnline){
-    stDot="on";stTxt="在线";
-  }else{
+  if(reallyOnline){stDot="on";stTxt="在线";}
+  else{
     stDot="off";stTxt="离线";
-    // 离线时长用 last_seen_ago（文档）；metrics:null 但 online:true 的"刚连上"按 0 处理
-    var agoSec = (n.last_seen_ago!=null) ? n.last_seen_ago : 0;
-    if(n.online) stSub='<span class="no-metric">指标未上报</span>';
-    else{var ago=offlineAgo(agoSec);if(ago)stSub='<span class="off-tag">'+esc(ago)+"</span>";}
+    var agoSec=(n.last_seen_ago!=null)?n.last_seen_ago:0;
+    if(n.online) stSub="<span class='no-metric'>指标未上报</span>";
+    else{var ago=offlineAgo(agoSec);if(ago)stSub="<span class='off-tag'>"+esc(ago)+"</span>";}
   }
-
+  var nameHtml="<div class='name'>"+(n.country?"<span class='chip'>"+esc(n.country)+"</span>":"")+
+    "<span class='nm' title='"+esc(n.name)+"'>"+esc(n.name)+"</span></div>";
+  if(n.public_remark) nameHtml+="<div class='remark'>"+esc(n.public_remark)+"</div>";
+  var osi=osIcon(n.os);
+  var osHtml="<div title='"+esc(osi.label+" · "+(n.os||"未知"))+"'>"+osi.svg+"</div>";
   var cpuCell;
-  if(m&&m.cpu!=null){
+  if(m.cpu!=null){
     var c=Math.max(0,Math.min(100,m.cpu));
     var cls=c>90?"max":(c>70?"hi":"");
-    var memTxt=m.mem_used!=null&&m.mem_total?humanBytes(m.mem_used)+" / "+humanBytes(m.mem_total)+" 内存":"";
-    cpuCell='<div class="bar"><div class="track"><div class="fill '+cls+'" style="width:'+c+'%"></div></div>'+
-      '<span class="pct">'+Math.round(c)+'%</span></div>'+
-      (memTxt?'<div class="mem">'+esc(memTxt)+"</div>":"");
-  }else cpuCell='<span class="no-metric">不可用</span>';
-
-  var lat=state.latency[n.id]!=null?state.latency[n.id]:null;
-  var latTxt=lat!=null?Math.round(lat)+" ms":'<span class="no-metric">—</span>';
-
-  var rx=(m&&m.net_rx!=null)?bytesPerSec(m.net_rx):'<span class="no-metric">—</span>';
-  var tx=(m&&m.net_tx!=null)?bytesPerSec(m.net_tx):'<span class="no-metric">—</span>';
-
+    cpuCell="<div class='bar'><div class='track'><div class='fill "+cls+"' style='width:"+c+"%'></div></div>"+
+      "<span class='pct'>"+Math.round(c)+"%</span></div>"+
+      (m.cpu_cores?"<div class='sub'>"+m.cpu_cores+" 核</div>":"");
+  }else cpuCell="<div class='no-metric'>—</div>";
+  var memCell=resourceCell("内存", m.mem_used, m.mem_total);
+  var diskCell=resourceCell("硬盘", m.disk_used, m.disk_total);
+  var totalCell;
+  if(n.total_rx!=null||n.total_tx!=null){
+    var tr=(n.total_rx||0)+(n.total_tx||0);
+    totalCell="<div class='sub'>RX "+esc(humanBytes(n.total_rx||0))+"</div>"+
+      "<div class='sub'>TX "+esc(humanBytes(n.total_tx||0))+"</div>"+
+      "<div class='total'>"+esc(humanBytes(tr))+"</div>";
+  }else totalCell="<div class='no-metric'>—</div>";
+  var latCell;
+  var byProbe=state.probeLat[n.id];
+  if(byProbe&&byProbe.length){
+    var rows=byProbe.map(function(p){
+      var cls=p.latency==null?"none":(p.latency>=150?"bad":(p.latency>=80?"warn":"ok"));
+      return "<div class='lrow'><span class='lnm' title='"+esc(p.name)+"'>"+esc(p.name)+"</span>"+
+        "<span class='lval "+cls+"'>"+(p.latency!=null?Math.round(p.latency)+" ms":"—")+"</span></div>";
+    }).join("");
+    latCell="<div class='lats'>"+rows+"</div>";
+  }else latCell="<div class='no-metric'>—</div>";
   var e=expireInfo(n);
-  var expTxt='<span class="exp '+e.cls+'">'+esc(e.txt)+"</span>";
+  var expTxt="<span class='exp "+e.cls+"'>"+esc(e.txt)+"</span>";
   var price=money(n.price,n.currency);
-  if(price) expTxt+='<br><span class="cyc" style="font-size:11px;color:var(--muted)">'+esc(price)+" "+esc(cycleLabel(n.billing_cycle))+"</span>";
-  else expTxt+='<br><span style="font-size:11px;color:var(--dim)">'+esc(cycleLabel(n.billing_cycle)||"—")+"</span>";
-
-  var nameHtml='<div class="name">'+(n.country?'<span class="chip">'+esc(n.country)+"</span>":"")+
-    '<span class="nm" title="'+esc(n.name)+'">'+esc(n.name)+"</span></div>";
-  if(n.public_remark) nameHtml+='<div class="remark">'+esc(n.public_remark)+"</div>";
-
+  if(price) expTxt+="<br><span style='font-size:11px;color:var(--muted)'>"+esc(price)+" "+esc(cycleLabel(n.billing_cycle))+"</span>";
   return "<tr>"+
+    "<td class='col-os'>"+osHtml+"</td>"+
     "<td class='col-name'>"+nameHtml+"</td>"+
     "<td class='col-status'><div class='st'><span class='dot "+stDot+"'></span><span class='txt'>"+stTxt+"</span></div>"+
-      (stSub?'<div class="st sub">'+stSub+"</div>":"")+"</td>"+
+      (stSub?"<div class='st sub'>"+stSub+"</div>":"")+"</td>"+
     "<td class='col-cpu'>"+cpuCell+"</td>"+
-    "<td class='col-lat r'>"+latTxt+"</td>"+
-    "<td class='col-rx r'>"+rx+"</td>"+
-    "<td class='col-tx r'>"+tx+"</td>"+
+    "<td class='col-mem'>"+memCell+"</td>"+
+    "<td class='col-disk'>"+diskCell+"</td>"+
+    "<td class='col-traffic r'>"+totalCell+"</td>"+
+    "<td class='col-lat'>"+latCell+"</td>"+
     "<td class='col-exp'>"+expTxt+"</td>"+
   "</tr>";
 }
 function renderRows(){
   var tb=document.getElementById("rows");
-  if(!state.nodes.length){tb.innerHTML='<tr><td colspan="7" class="empty">暂无节点</td></tr>';return;}
+  if(!state.nodes.length){tb.innerHTML="<tr><td colspan='9' class='empty'>暂无节点</td></tr>";return;}
   tb.innerHTML=state.nodes.map(nodeRow).join("");
 }
 function renderLive(){
@@ -326,7 +355,7 @@ function renderLive(){
   t.textContent=state.wsLive?"实时推送":"轮询中";
 }
 function renderAll(){
-  renderNotice();renderCounts();renderSummary();renderMeta();renderRows();renderLive();
+  renderNotice();renderCounts();renderMeta();renderRows();renderLive();
   document.getElementById("upd").textContent=new Date().toLocaleTimeString("zh-CN");
 }
 function showErr(t){var el=document.getElementById("err");el.textContent=t;el.hidden=!t;}
@@ -353,23 +382,19 @@ function loadMe(){
     document.title=state.site;
   }).catch(function(){});
 }
+/* 拉每个在线节点的 3 网延迟（分批 ≤30，失败不影响主界面） */
 function fetchLatencies(){
-  // 优先用节点自带的 ping 序列（若 hub 有给），其余走 metrics 接口分批补拉
-  state.nodes.forEach(function(n){
-    if(n.ping&&n.ping.length){var l=lastLatencyFromPing(n.ping);if(l!=null)state.latency[n.id]=l;}
-  });
-  renderRows();
-  var missing=state.nodes.filter(function(n){
-    return n.online && state.latency[n.id]==null && !(n.ping&&n.ping.length);
-  }).slice(0,20);
-  if(!missing.length) return;
-  // 分批（每批 8 个）避免首屏并发过多；延迟数据属次要，失败不影响主界面
-  var batch=missing.splice(0,8);
-  Promise.all(batch.map(function(n){
+  var nodes=state.nodes.filter(function(n){return n.online}).slice(0,30);
+  if(!nodes.length) return;
+  Promise.all(nodes.map(function(n){
     return api("/api/nodes/"+n.id+"/metrics?hours=1&series=ping")
-      .then(function(d){if(d&&d.ping){var l=lastLatencyFromPing(d.ping);if(l!=null)state.latency[n.id]=l;}})
-      .catch(function(){});
-  })).then(function(){if(missing.length)fetchLatencies();else renderRows();});
+      .then(function(d){
+        if(d&&d.ping){
+          if(d.probes) state.probeNames=d.probes;
+          state.probeLat[n.id]=lastLatencyByProbe(d.ping, d.probes||state.probeNames);
+        }
+      }).catch(function(){});
+  })).then(function(){renderRows();});
 }
 function refreshNodes(){
   return api("/api/nodes").then(function(d){
@@ -379,7 +404,7 @@ function refreshNodes(){
   });
 }
 
-/* ===== WebSocket（gzip 双帧 + 轮询兜底，文档写法）===== */
+/* ===== WebSocket（gzip 双帧 + 轮询兜底）===== */
 var ws=null;
 function wsUrl(){
   var s=location.protocol==="https:"?"wss":"ws";
@@ -398,18 +423,13 @@ function connectWS(){
       return frameText(ev.data).then(function(txt){
         if(ws.readyState!==WebSocket.OPEN) return;
         var d=JSON.parse(txt);
-        if(d.nodes){
-          state.nodes=d.nodes;state.wsLive=true;
-          // 快照里若带 ping 则同步刷新延迟
-          d.nodes.forEach(function(n){if(n.ping&&n.ping.length){var l=lastLatencyFromPing(n.ping);if(l!=null)state.latency[n.id]=l;}});
-          renderAll();
-        }
+        if(d.nodes){state.nodes=d.nodes;state.wsLive=true;renderAll();}
       });
     }).catch(function(){});
   };
   ws.onopen=function(){state.wsLive=true;renderLive();};
   ws.onclose=function(){state.wsLive=false;renderLive();startPoll();};
-  ws.onerror=function(){if(ws){try{ws.close();}catch(e){}}};
+  ws.onerror=function(){if(ws){try{ws.close();}catch(e){}}}
 }
 var pollTimer=null;
 function startPoll(){
@@ -427,19 +447,15 @@ document.addEventListener("visibilitychange",function(){
   refreshNodes();connectWS();
 });
 
-/* 深浅色：跟随系统，手动可覆盖 */
 function applyTheme(){
   var saved;try{saved=localStorage.getItem("theme")||"";}catch(e){}
   var dark=saved==="dark"||(!saved&&matchMedia("(prefers-color-scheme: dark)").matches);
   document.documentElement.setAttribute("data-theme",dark?"dark":"light");
 }
 
-/* 启动 */
 applyTheme();
 loadConfig();
-loadMe().then(function(){
-  refreshNodes().then(connectWS);
-});
+loadMe().then(function(){refreshNodes().then(connectWS);});
 </script>
 </body>
 </html>
