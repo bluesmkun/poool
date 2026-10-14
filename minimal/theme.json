@@ -2,7 +2,7 @@
   "name": "极简",
   "short": "minimal",
   "description": "极简黑白风格，单屏紧凑表格：在线状态、CPU/内存、延迟、上下行流量、到期与离线时长，一眼看全。",
-  "version": "1.0.1",
+  "version": "1.2.3",
   "author": "",
   "url": "",
   "config": [
